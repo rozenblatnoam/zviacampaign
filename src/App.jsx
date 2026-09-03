@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import kolleLogo from "./assets/kollel-logo.jpg";
-import tzviaLogo from "./assets/צביה.png";
+import tzviaLogo from "./assets/tzvia.png";
 
 /* =========================================================
    PRIZES
