@@ -1,48 +1,30 @@
 import React, { useEffect, useMemo, useState } from "react";
 import kolleLogo from "./assets/kollel-logo.jpg";
 import tzviaLogo from "./assets/tzvia.png";
+import { db } from "./firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 /* =========================================================
    PRIZES
 ========================================================= */
 
 const PRIZES = [
-  {
-    id: 1,
-    amount: 1500,
-    emoji: "🎧",
-    title: "אוזניות Bluetooth",
-    subtitle: "גייסת 1,500 ₪ לבית המדרש?",
-    description: "האוזניות שלך!",
-    image:
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=90",
-    className: "blue",
-  },
-  {
-    id: 2,
-    amount: 2500,
-    emoji: "🔊",
-    title: "רמקול אלחוטי JBL",
-    subtitle: "הגעת ל־2,500 ₪?",
-    description: "משדרגים לרמקול JBL!",
-    image:
-      "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=1000&q=90",
-    className: "orange",
-  },
-  {
-    id: 3,
-    amount: 3500,
-    emoji: "🚁",
-    title: "רחפן",
-    subtitle: "הגעת ל־3,500 ₪?",
-    description: "הרחפן מחכה לך!",
-    image:
-      "https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&w=1000&q=90",
-    className: "purple",
-  },
+  // 750 ₪
+  { id: 1, amount: 750, emoji: "🏕️", title: "ערכת קמפינג", subtitle: "גייסת 750 ₪ לבית המדרש?", description: "ערכת קמפינג שווה במיוחד!", image: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=900&q=80", className: "green" },
+  { id: 2, amount: 750, emoji: "🎮", title: "עכבר גיימינג", subtitle: "גייסת 750 ₪ לבית המדרש?", description: "עכבר גיימינג איכותי!", image: "https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=1000&q=90", className: "green" },
+  // 1,500 ₪
+  { id: 3, amount: 1500, emoji: "🎧", title: "אוזניות Bluetooth", subtitle: "גייסת 1,500 ₪ לבית המדרש?", description: "האוזניות שלך!", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=90", className: "blue" },
+  { id: 4, amount: 1500, emoji: "⌚", title: "שעון חכם", subtitle: "גייסת 1,500 ₪ לבית המדרש?", description: "שעון חכם איכותי לבחירתך!", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1000&q=90", className: "blue" },
+  // 2,500 ₪
+  { id: 5, amount: 2500, emoji: "🔊", title: "רמקול אלחוטי JBL", subtitle: "הגעת ל־2,500 ₪?", description: "משדרגים לרמקול JBL!", image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=1000&q=90", className: "orange" },
+  { id: 6, amount: 2500, emoji: "⌨️", title: "סט גיימינג", subtitle: "הגעת ל־2,500 ₪?", description: "מקלדת ועכבר גיימינג איכותיים!", image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=1000&q=90", className: "orange" },
+  // 3,500 ₪
+  { id: 7, amount: 3500, emoji: "🚁", title: "רחפן", subtitle: "הגעת ל־3,500 ₪?", description: "הרחפן מחכה לך!", image: "https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&w=1000&q=90", className: "purple" },
+  { id: 8, amount: 3500, emoji: "📷", title: "מצלמת אקסטרים", subtitle: "הגעת ל־3,500 ₪?", description: "מצלמת אקסטרים איכותית!", image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1000&q=90", className: "purple" },
 ];
 
-const MAX_AMOUNT = 3500;
+const PRIZE_AMOUNTS = [...new Set(PRIZES.map((prize) => prize.amount))];
+const MAX_AMOUNT = Math.max(...PRIZE_AMOUNTS);
 
 /* =========================================================
    HELPERS
@@ -153,6 +135,7 @@ export default function App() {
     grade: "",
     phone: "",
     target: "",
+    selectedPrize: "",
   });
 
   const [submitted, setSubmitted] = useState(false);
@@ -165,13 +148,21 @@ export default function App() {
     (raised / MAX_AMOUNT) * 100
   );
 
-  const reachedPrize = [...PRIZES]
+  const reachedAmount = [...PRIZE_AMOUNTS]
     .reverse()
-    .find((prize) => raised >= prize.amount);
+    .find((amount) => raised >= amount);
 
-  const nextPrize = PRIZES.find(
-    (prize) => raised < prize.amount
+  const nextAmount = PRIZE_AMOUNTS.find(
+    (amount) => raised < amount
   );
+
+  const reachedPrize = reachedAmount
+    ? PRIZES.find((prize) => prize.amount === reachedAmount)
+    : null;
+
+  const nextPrize = nextAmount
+    ? PRIZES.find((prize) => prize.amount === nextAmount)
+    : null;
 
   const maxReached = raised >= MAX_AMOUNT;
 
@@ -217,22 +208,52 @@ export default function App() {
     setForm((current) => ({
       ...current,
       target: String(amount),
+      selectedPrize: "",
     }));
   };
 
-  const submitForm = (event) => {
+  const choosePrize = (prize) => {
+    setForm((current) => ({
+      ...current,
+      target: String(prize.amount),
+      selectedPrize: String(prize.id),
+    }));
+  };
+
+  const submitForm = async (event) => {
     event.preventDefault();
 
     if (
       !form.firstName ||
       !form.lastName ||
       !form.phone ||
-      !form.target
+      !form.target ||
+      !form.selectedPrize
     ) {
       return;
     }
 
-    setSubmitted(true);
+    const selectedPrize = PRIZES.find(
+      (prize) => String(prize.id) === String(form.selectedPrize)
+    );
+
+    try {
+      await addDoc(collection(db, "registrations"), {
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        grade: form.grade.trim(),
+        phone: form.phone.trim(),
+        target: Number(form.target),
+        prizeId: selectedPrize?.id || "",
+        prize: selectedPrize?.title || "",
+        createdAt: serverTimestamp(),
+      });
+
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Registration save failed:", error);
+      alert("אירעה שגיאה בשמירת ההרשמה. נסה שוב.");
+    }
   };
 
   /* =======================================================
@@ -256,7 +277,7 @@ export default function App() {
           <>
             כל הכבוד! הגעת ל־
             <strong>
-              {reachedPrize.amount.toLocaleString("he-IL")} ₪
+              {reachedAmount.toLocaleString("he-IL")} ₪
             </strong>
             ! 🎉
             <br />
@@ -272,7 +293,7 @@ export default function App() {
         <strong>
           {remaining.toLocaleString("he-IL")} ₪
         </strong>{" "}
-        עד {nextPrize.title}!
+        עד פרס ב־{nextAmount.toLocaleString("he-IL")} ₪!
       </>
     );
   }
@@ -280,7 +301,7 @@ export default function App() {
   if (maxReached) {
     progressMessage = (
       <>
-        🎉 <strong>הגעת ל־3,500 ₪!</strong>
+        🎉 <strong>הגעת ל־{MAX_AMOUNT.toLocaleString("he-IL")} ₪!</strong>
         <br />
         הרחפן מחכה לך! 🚁
       </>
@@ -630,7 +651,7 @@ export default function App() {
 
         .steps {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(4, 1fr);
           gap: 18px;
         }
 
@@ -721,6 +742,10 @@ export default function App() {
           border-top: 7px solid var(--purple);
         }
 
+        .prize.green {
+          border-top: 7px solid var(--green);
+        }
+
         .prize-image {
           position: relative;
           height: 300px;
@@ -761,6 +786,10 @@ export default function App() {
 
         .prize.purple .prize-amount {
           color: var(--purple);
+        }
+
+        .prize.green .prize-amount {
+          color: var(--green);
         }
 
         .prize-content {
@@ -824,6 +853,11 @@ export default function App() {
         .prize.purple .prize-button {
           background: var(--purple-light);
           color: var(--purple);
+        }
+
+        .prize.green .prize-button {
+          background: #e9f8f1;
+          color: var(--green);
         }
 
         /* =====================================================
@@ -1081,8 +1115,45 @@ export default function App() {
 
         .targets {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(4, 1fr);
           gap: 10px;
+        }
+
+        .prize-choice-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+          margin-top: 10px;
+        }
+
+        .prize-choice {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 9px;
+          min-height: 58px;
+          border: 2px solid var(--border);
+          border-radius: 12px;
+          padding: 10px;
+          background: #ffffff;
+          color: var(--dark);
+          font-weight: 800;
+          transition: .15s;
+        }
+
+        .prize-choice:hover {
+          border-color: var(--blue-light);
+          background: #f8faff;
+        }
+
+        .prize-choice.active {
+          border-color: var(--blue);
+          background: var(--blue-light);
+          color: var(--blue);
+        }
+
+        .prize-choice-emoji {
+          font-size: 24px;
         }
 
         .target {
@@ -1237,8 +1308,8 @@ export default function App() {
         @media (max-width: 850px) {
 
           .prizes {
-            grid-template-columns: 1fr;
-            max-width: 560px;
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 760px;
             margin: auto;
           }
 
@@ -1343,6 +1414,19 @@ export default function App() {
           .form-grid {
             grid-template-columns: 1fr;
             gap: 0;
+          }
+
+          .targets {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .prize-choice-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .prizes {
+            grid-template-columns: 1fr;
+            max-width: 560px;
           }
 
           .prize-image {
@@ -1669,24 +1753,20 @@ export default function App() {
                 <span>מתחילים</span>
               </div>
 
-              {PRIZES.map((prize) => (
-
-                <div
-                  key={prize.id}
-                  className={`progress-label ${
-                    raised >= prize.amount
-                      ? "active"
-                      : ""
-                  }`}
-                >
-                  {prize.emoji}
-
-                  <span>
-                    {prize.amount.toLocaleString("he-IL")} ₪
-                  </span>
-                </div>
-
-              ))}
+              {PRIZE_AMOUNTS.map((amount) => {
+                const prize = PRIZES.find((item) => item.amount === amount);
+                return (
+                  <div
+                    key={amount}
+                    className={`progress-label ${
+                      raised >= amount ? "active" : ""
+                    }`}
+                  >
+                    {prize?.emoji}
+                    <span>{amount.toLocaleString("he-IL")} ₪</span>
+                  </div>
+                );
+              })}
 
             </div>
 
@@ -1885,30 +1965,60 @@ export default function App() {
 
                   <div className="targets">
 
-                    {PRIZES.map((prize) => (
-
+                    {PRIZE_AMOUNTS.map((amount) => (
                       <button
-                        key={prize.id}
+                        key={amount}
                         type="button"
                         className={`target ${
-                          form.target === String(prize.amount)
-                            ? "active"
-                            : ""
+                          form.target === String(amount) ? "active" : ""
                         }`}
-                        onClick={() =>
-                          chooseTarget(prize.amount)
-                        }
+                        onClick={() => chooseTarget(amount)}
                       >
-                        {prize.emoji}
+                        🎯
                         <br />
-                        {prize.amount.toLocaleString("he-IL")} ₪
+                        {amount.toLocaleString("he-IL")} ₪
                       </button>
-
                     ))}
 
                   </div>
 
                 </div>
+
+                {form.target && (
+                  <div className="field">
+
+                    <label>
+                      איזה פרס תרצה לקבל ביעד הזה?
+                    </label>
+
+                    <div className="prize-choice-grid">
+
+                      {PRIZES.filter(
+                        (prize) => prize.amount === Number(form.target)
+                      ).map((prize) => (
+
+                        <button
+                          key={prize.id}
+                          type="button"
+                          className={`prize-choice ${
+                            form.selectedPrize === String(prize.id)
+                              ? "active"
+                              : ""
+                          }`}
+                          onClick={() => choosePrize(prize)}
+                        >
+                          <span className="prize-choice-emoji">
+                            {prize.emoji}
+                          </span>
+                          <span>{prize.title}</span>
+                        </button>
+
+                      ))}
+
+                    </div>
+
+                  </div>
+                )}
 
                 <button
                   type="submit"
