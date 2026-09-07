@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import kolleLogo from "./assets/kollel-logo.jpg";
 import tzviaLogo from "./assets/tzvia.png";
+import eretzLogo from "./assets/eretz.jpg";
 import { db } from "./firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
@@ -10,17 +11,76 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 const PRIZES = [
   // 750 ₪
-  { id: 1, amount: 750, emoji: "🏕️", title: "ערכת קמפינג", subtitle: "גייסת 750 ₪ לבית המדרש?", description: "ערכת קמפינג שווה במיוחד!", image: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=900&q=80", className: "green" },
-  { id: 2, amount: 750, emoji: "🎮", title: "עכבר גיימינג", subtitle: "גייסת 750 ₪ לבית המדרש?", description: "עכבר גיימינג איכותי!", image: "https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=1000&q=90", className: "green" },
+  {
+    id: 1,
+    amount: 750,
+    emoji: "🎟️",
+    title: "שובר לחנות ארץ",
+    subtitle: "גייסת 750 ₪ לבית המדרש?",
+    description: "שובר לחנות ארץ ציוד מחנאות או פק״ל קפה!",
+    image:
+      "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1200&q=90",
+    className: "green",
+  },
   // 1,500 ₪
-  { id: 3, amount: 1500, emoji: "🎧", title: "אוזניות Bluetooth", subtitle: "גייסת 1,500 ₪ לבית המדרש?", description: "האוזניות שלך!", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=90", className: "blue" },
-  { id: 4, amount: 1500, emoji: "⌚", title: "שעון חכם", subtitle: "גייסת 1,500 ₪ לבית המדרש?", description: "שעון חכם איכותי לבחירתך!", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1000&q=90", className: "blue" },
+  {
+    id: 3,
+    amount: 1500,
+    emoji: "🔊",
+    title: "בוקסה אלחוטית JBL",
+    subtitle: "גייסת 1,500 ₪ לבית המדרש?",
+    description: "בוקסה אלחוטית JBL !",
+    image:
+      "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=1000&q=90",
+    className: "blue",
+  },
+  {
+    id: 4,
+    amount: 1500,
+    emoji: "🎧",
+    title: "אוזניות Bluetooth",
+    subtitle: "גייסת 1,500 ₪ לבית המדרש?",
+    description: "אוזניות Bluetooth איכותיות!",
+    image:
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=90",
+    className: "blue",
+  },
+
   // 2,500 ₪
-  { id: 5, amount: 2500, emoji: "🔊", title: "רמקול אלחוטי JBL", subtitle: "הגעת ל־2,500 ₪?", description: "משדרגים לרמקול JBL!", image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=1000&q=90", className: "orange" },
-  { id: 6, amount: 2500, emoji: "⌨️", title: "סט גיימינג", subtitle: "הגעת ל־2,500 ₪?", description: "מקלדת ועכבר גיימינג איכותיים!", image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=1000&q=90", className: "orange" },
+  {
+    id: 5,
+    amount: 2500,
+    emoji: "⛺",
+    title: "ערכת מחנאות – אוהל ושק״ש",
+    subtitle: "הגעת ל־2,500 ₪?",
+    description: "ערכת מחנאות הכוללת אוהל ושק שינה!",
+    image:
+      "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1000&q=90",
+    className: "orange",
+  },
   // 3,500 ₪
-  { id: 7, amount: 3500, emoji: "🚁", title: "רחפן", subtitle: "הגעת ל־3,500 ₪?", description: "הרחפן מחכה לך!", image: "https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&w=1000&q=90", className: "purple" },
-  { id: 8, amount: 3500, emoji: "📷", title: "מצלמת אקסטרים", subtitle: "הגעת ל־3,500 ₪?", description: "מצלמת אקסטרים איכותית!", image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1000&q=90", className: "purple" },
+  {
+    id: 7,
+    amount: 3500,
+    emoji: "🚲",
+    title: "אופניים",
+    subtitle: "הגעת ל־3,500 ₪?",
+    description: "אופניים איכותיים לרכיבה!",
+    image:
+      "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=1000&q=90",
+    className: "purple",
+  },
+  {
+    id: 8,
+    amount: 3500,
+    emoji: "🚁",
+    title: "רחפן",
+    subtitle: "הגעת ל־3,500 ₪?",
+    description: "רחפן איכותי לחוויית טיסה!",
+    image:
+      "https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&w=1000&q=90",
+    className: "purple",
+  },
 ];
 
 const PRIZE_AMOUNTS = [...new Set(PRIZES.map((prize) => prize.amount))];
@@ -761,8 +821,29 @@ export default function App() {
           transition: transform .45s;
         }
 
+        .prize-image.eretz-logo {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #ffffff;
+        }
+
+        .prize-image.eretz-logo img {
+          width: 78%;
+          height: auto;
+          max-height: 72%;
+          object-fit: contain;
+          padding: 28px;
+          box-sizing: border-box;
+          transform: none !important;
+        }
+
         .prize:hover .prize-image img {
           transform: scale(1.06);
+        }
+
+        .prize:hover .prize-image.eretz-logo img {
+          transform: none !important;
         }
 
         .prize-amount {
@@ -792,8 +873,16 @@ export default function App() {
           color: var(--green);
         }
 
+        .prize-disclaimer {
+          padding: 8px 12px 0;
+          color: #8a95a7;
+          text-align: center;
+          font-size: 12px;
+          font-weight: 500;
+        }
+
         .prize-content {
-          padding: 25px 22px 23px;
+          padding: 20px 22px 23px;
           text-align: center;
         }
 
@@ -1642,17 +1731,25 @@ export default function App() {
                 className={`prize ${prize.className}`}
               >
 
-                <div className="prize-image">
+                <div
+                  className={`prize-image ${
+                    prize.id === 1 ? "eretz-logo" : ""
+                  }`}
+                >
 
                   <img
-                    src={prize.image}
-                    alt={prize.title}
+                    src={prize.id === 1 ? eretzLogo : prize.image}
+                    alt={prize.id === 1 ? "לוגו ארץ ציוד מחנאות" : prize.title}
                   />
 
                   <div className="prize-amount">
                     {prize.amount.toLocaleString("he-IL")} ₪
                   </div>
 
+                </div>
+
+                <div className="prize-disclaimer">
+                  התמונות להמחשה בלבד.
                 </div>
 
                 <div className="prize-content">
