@@ -61,10 +61,10 @@ const PRIZES = [
   // 3,500 ₪
   {
     id: 7,
-    amount: 3500,
+    amount: 4000,
     emoji: "🚲",
     title: "אופניים",
-    subtitle: "הגעת ל־3,500 ₪?",
+    subtitle: "הגעת ל־4,000 ₪?",
     description: "אופניים איכותיים לרכיבה!",
     image:
       "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=1000&q=90",
@@ -72,10 +72,10 @@ const PRIZES = [
   },
   {
     id: 8,
-    amount: 3500,
+    amount: 4000,
     emoji: "🚁",
     title: "רחפן",
-    subtitle: "הגעת ל־3,500 ₪?",
+    subtitle: "הגעת ל־4,000 ₪?",
     description: "רחפן איכותי לחוויית טיסה!",
     image:
       "https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&w=1000&q=90",
