@@ -2039,7 +2039,7 @@ export default function App() {
                   <div className="field">
 
                     <label>
-                      מספר טלפון
+                      מספר טלפון הורה
                     </label>
 
                     <input
